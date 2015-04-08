@@ -32,7 +32,7 @@ def ldaLearn(X,y):
     #covariance matrix is 2*2
     covmat=np.cov(X,rowvar=0)
     return means,covmat
-    
+
 def qdaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -43,6 +43,23 @@ def qdaLearn(X,y):
     # covmats - A list of k d x d learnt covariance matrices for each of the k classes
     
     # IMPLEMENT THIS METHOD
+     #trainingData is 150*2
+    trainingData=X;
+    rows=trainingData.shape[0];
+    colums=trainingData.shape[1];
+    #trueLabels is 150*1
+    trueLables=y.reshape(y.size)
+    #classLables will be in the range 1,2,3,4,5
+    classLabels=np.unique(trueLables)
+    #Means matrix dim will be 2*5
+    means=np.zeros((colums,classLabels.size))
+    #calculating the mean of the values where the classLabel=trueLabel
+    covmats=[np.zeros((colums,colums))]*classLabels.size
+    ##mean matrix is 2*5 one row represents x mean,other y mean 
+    for i in range(classLabels.size):
+        means[:,i]=np.mean(trainingData[trueLables==classLabels[i]],axis=0)
+        covmats[i]=np.cov(trainingData[trueLables==classLabels[i]],rowvar=0)
+  
     
     return means,covmats
 
@@ -55,14 +72,17 @@ def ldaTest(means,covmat,Xtest,ytest):
     # acc - A scalar accuracy value
     invcovmat = np.linalg.inv(covmat)
     covmatdet = np.linalg.det(covmat)
-    ydist = np.zeros((Xtest.shape[0],means.shape[1]))
+    pdf= np.zeros((Xtest.shape[0],means.shape[1]))
     for i in range(means.shape[1]):
-        ydist[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
-        np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(covmatdet**2))
-    ylabel = np.argmax(ydist,1)
-    ylabel = ylabel + 1
+        pdf[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
+        np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    #Getting the index of the class with the highest probability
+    trueLabel = np.argmax(pdf,1)
+    #Index start from 0,class index start from 1.So to balance the index adding 1 to all the index
+    trueLabel = trueLabel + 1
     ytest = ytest.reshape(ytest.size)
-    acc = 100*np.mean(ylabel == ytest)
+    #calculating the accuracy
+    acc = 100*np.mean(trueLabel == ytest)
     # IMPLEMENT THIS METHOD
     return acc
 
@@ -75,6 +95,19 @@ def qdaTest(means,covmats,Xtest,ytest):
     # acc - A scalar accuracy value
     
     # IMPLEMENT THIS METHOD
+    pdf= np.zeros((Xtest.shape[0],means.shape[1]))
+    for i in range(means.shape[1]):
+        invcovmat = np.linalg.inv(covmats[i])
+        covmatdet = np.linalg.det(covmats[i])
+        pdf[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
+        np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    #Getting the index of the class with the highest probability
+    trueLabel = np.argmax(pdf,1)
+    #Index start from 0,class index start from 1.So to balance the index adding 1 to all the index
+    trueLabel = trueLabel + 1
+    ytest = ytest.reshape(ytest.size)
+    #calculating the accuracy
+    acc = 100*np.mean(trueLabel == ytest)
     return acc
 
 def learnOLERegression(X,y):
@@ -157,7 +190,7 @@ def mapNonLinear(x,p):
     return Xd
 
 # Main script
-folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
+folderpath = '/home/hharwani/Downloads/ML-Project-2/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -169,8 +202,8 @@ means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
 # QDA
-#means,covmats = qdaLearn(X,y)
-#qdaacc = qdaTest(means,covmats,Xtest,ytest)
+means,covmats = qdaLearn(X,y)
+qdaacc = qdaTest(means,covmats,Xtest,ytest)
 #print('QDA Accuracy = '+str(qdaacc))
 
 # Problem 2

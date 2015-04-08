@@ -5,7 +5,6 @@ from math import sqrt
 import scipy.io
 import matplotlib.pyplot as plt
 import pickle
-
 def ldaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -15,10 +14,24 @@ def ldaLearn(X,y):
     # means - A d x k matrix containing learnt means for each of the k classes
     # covmat - A single d x d learnt covariance matrix 
     
-    # IMPLEMENT THIS METHOD
-    
+    #trainingData is 150*2
+    trainingData=X;
+    rows=trainingData.shape[0];
+    colums=trainingData.shape[1];
+    #trueLabels is 150*1
+    trueLables=y.reshape(y.size)
+    #classLables will be in the range 1,2,3,4,5
+    classLabels=np.unique(trueLables)
+    #Means matrix dim will be 2*5
+    means=np.zeros((colums,classLabels.size))
+    #calculating the mean of the values where the classLabel=trueLabel
+    ##mean matrix is 2*5 one row represents x mean,other y mean 
+    for i in range(classLabels.size):
+        means[:,i]=np.mean(trainingData[trueLables==classLabels[i]],axis=0)
+    #covariance matrix is 2*2
+    covmat=np.cov(X,rowvar=0)
     return means,covmat
-
+    
 def qdaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -39,7 +52,16 @@ def ldaTest(means,covmat,Xtest,ytest):
     # ytest - a N x 1 column vector indicating the labels for each test example
     # Outputs
     # acc - A scalar accuracy value
-    
+    invcovmat = np.linalg.inv(covmat)
+    covmatdet = np.linalg.det(covmat)
+    ydist = np.zeros((Xtest.shape[0],means.shape[1]))
+    for i in range(means.shape[1]):
+        ydist[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
+        np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(covmatdet**2))
+    ylabel = np.argmax(ydist,1)
+    ylabel = ylabel + 1
+    ytest = ytest.reshape(ytest.size)
+    acc = 100*np.mean(ylabel == ytest)
     # IMPLEMENT THIS METHOD
     return acc
 
@@ -107,7 +129,7 @@ def mapNonLinear(x,p):
 
 # Problem 1
 # load the sample data                                                                 
-X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'),encoding = 'latin1')            
+X,y,Xtest,ytest = pickle.load(open('/home/hharwani/Downloads/sample.pickle','rb'))            
 
 # LDA
 means,covmat = ldaLearn(X,y)

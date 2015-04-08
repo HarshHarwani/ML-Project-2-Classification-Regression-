@@ -53,17 +53,17 @@ def ldaTest(means,covmat,Xtest,ytest):
     # ytest - a N x 1 column vector indicating the labels for each test example
     # Outputs
     # acc - A scalar accuracy value
-    invcovmat = np.linalg.inv(covmat)
-    covmatdet = np.linalg.det(covmat)
+    # IMPLEMENT THIS METHOD
+    inverseCovmat = np.linalg.inv(covmat)
+    covMatDet = np.linalg.det(covmat)
     ydist = np.zeros((Xtest.shape[0],means.shape[1]))
     for i in range(means.shape[1]):
         ydist[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
-        np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(covmatdet**2))
+        np.dot(inverseCovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(covMatDet**2))
     ylabel = np.argmax(ydist,1)
     ylabel = ylabel + 1
     ytest = ytest.reshape(ytest.size)
     acc = 100*np.mean(ylabel == ytest)
-    # IMPLEMENT THIS METHOD
     return acc
 
 def qdaTest(means,covmats,Xtest,ytest):
@@ -71,7 +71,7 @@ def qdaTest(means,covmats,Xtest,ytest):
     # means, covmats - parameters of the QDA model
     # Xtest - a N x d matrix with each row corresponding to a test example
     # ytest - a N x 1 column vector indicating the labels for each test example
-    # Outputs
+    # Outputsi
     # acc - A scalar accuracy value
     
     # IMPLEMENT THIS METHOD

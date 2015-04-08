@@ -146,9 +146,14 @@ def mapNonLinear(x,p):
     # Inputs:                                                                  
     # x - a single column vector (N x 1)                                       
     # p - integer (>= 0)                                                       
-    # Outputs:                                                                 
-    # Xd - (N x (d+1))                                                         
-    # IMPLEMENT THIS METHOD
+    # Outputs:
+    # Xd - (N x (d+1))  
+    
+    N = x.shape[0]
+    Xd = np.empty([N, p+1])
+    for i in range(0, N):
+        for j in range(0, p+1):
+            Xd[i][j] = np.power(x[i], j)
     return Xd
 
 # Main script
@@ -193,16 +198,17 @@ for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
+plt.subplot(211)
 plt.plot(lambdas,rmses3)
-plt.show()
 
-'''
+
 # Problem 4
 k = 21
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
 opts = {'maxiter' : 100}    # Preferred value.                                                
+'''
 w_init = np.zeros((X_i.shape[1],1))
 for lambd in lambdas:
     args = (X_i, y, lambd)
@@ -213,7 +219,7 @@ for lambd in lambdas:
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
     i = i + 1
 plt.plot(lambdas,rmses4)
-
+'''
 
 # Problem 5
 pmax = 7
@@ -224,8 +230,11 @@ for p in range(pmax):
     Xdtest = mapNonLinear(Xtest[:,2],p)
     w_d1 = learnRidgeRegression(Xd,y,0)
     rmses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
-    w_d2 = learnRidgeRegression(Xd,y,lamda_opt)
+    w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
     rmses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
+plt.subplot(212)
 plt.plot(range(pmax),rmses5)
-plt.legend(('No Regularization','Regularization'))
-'''
+plt.legend(('No regularization','With regularization'))
+
+plt.axis('equal')
+plt.show()

@@ -197,15 +197,80 @@ folderpath = '/home/hharwani/Downloads/ML-Project-2/'
 
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'sample.pickle','rb'))            
 
+def plotGraph(Y,Z):
+    colorList=['r','g','b','y','c']
+    for i in range (Y.shape[0]):
+        plt.scatter(Y[i,0],Y[i,1],c=colorList[int(Z[i])-1])
+    plt.plot()
+    
+def plotGraphPoints(Y,Z):
+    colorList=['g','r','black','c','y']
+    for i in range (Y.shape[0]):
+        plt.scatter(Y[i,0],Y[i,1],c=colorList[int(Z[i])-1])
+    plt.plot()
+    
+def generateMesh(means,covmat,qdaFlag):
+    x1 = np.linspace(0,16,num=101)
+    x2 = np.linspace(0,16,num=101)
+    x=np.meshgrid(x1,x2)
+    x=np.array(x)
+    c=x[0].reshape(101*101,1)
+    d=x[1].reshape(101*101,1)
+    f=np.hstack((c,d))
+    invcovmat = np.linalg.inv(covmat)
+    covmatdet = np.linalg.det(covmat)
+    if qdaFlag is False:
+        pdf= np.zeros((f.shape[0],means.shape[1]))
+        for i in range(means.shape[1]):
+            pdf[:,i] = np.exp(-0.5*np.sum((f - means[:,i])* 
+            np.dot(invcovmat, (f - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    else:
+        pdf= np.zeros((f.shape[0],means.shape[1]))
+        for i in range(means.shape[1]):
+            invcovmat = np.linalg.inv(covmat[i])
+            covmatdet = np.linalg.det(covmat[i])
+            pdf[:,i] = np.exp(-0.5*np.sum((f - means[:,i])* 
+            np.dot(invcovmat, (f - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    trueLabel = np.argmax(pdf,1)
+    trueLabel = trueLabel + 1
+    plotGraph(f,trueLabel)
+    
+def generatePoints(Xtest,means,covmat,qdaFlag):
+    invcovmat = np.linalg.inv(covmat)
+    covmatdet = np.linalg.det(covmat)
+    if qdaFlag is False:
+        pdf= np.zeros((Xtest.shape[0],means.shape[1]))
+        for i in range(means.shape[1]):
+            pdf[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
+            np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    else:
+        pdf= np.zeros((Xtest.shape[0],means.shape[1]))
+        for i in range(means.shape[1]):
+            invcovmat = np.linalg.inv(covmat[i])
+            covmatdet = np.linalg.det(covmat[i])
+            pdf[:,i] = np.exp(-0.5*np.sum((Xtest - means[:,i])* 
+            np.dot(invcovmat, (Xtest - means[:,i]).T).T,1))/(np.sqrt(np.pi*2)*(np.power(covmatdet,2)))
+    trueLabel = np.argmax(pdf,1)
+    trueLabel = trueLabel + 1
+    plotGraphPoints(Xtest,trueLabel)
+
 # LDA
 means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
+generateMesh(means,covmat,False)
+generatePoints(Xtest,means,covmat,False)
+plt.title("LDA")
+plt.show()
 # QDA
-means,covmats = qdaLearn(X,y)
-qdaacc = qdaTest(means,covmats,Xtest,ytest)
-#print('QDA Accuracy = '+str(qdaacc))
 
+meansQda,covmatsQda = qdaLearn(X,y)
+qdaacc = qdaTest(meansQda,covmatsQda,Xtest,ytest)
+generateMesh(meansQda,covmatsQda,True)
+generatePoints(Xtest,meansQda,covmatsQda,True)
+plt.title("QDA")
+print('QDA Accuracy = '+str(qdaacc))
+plt.show()
 # Problem 2
 
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'diabetes.pickle','rb'))   
@@ -231,8 +296,8 @@ for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
-plt.subplot(211)
-plt.plot(lambdas,rmses3)
+#plt.subplot(211)
+#plt.plot(lambdas,rmses3)
 
 
 # Problem 4
@@ -271,3 +336,4 @@ plt.legend(('No regularization','With regularization'))
 
 plt.axis('equal')
 plt.show()
+#plt.show()

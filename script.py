@@ -172,7 +172,40 @@ def regressionObjVal(w, X, y, lambd):
     # to w (vector) for the given data X and y and the regularization parameter
     # lambda                                                                  
 
-    # IMPLEMENT THIS METHOD                                             
+    # IMPLEMENT THIS METHOD quared error (scalar) and gradient of squared error with respect
+    # to w (vector) for the given data X and y and the regularization parameter
+    # lambda       
+    
+    # IMPLEMENT THIS METHOD  
+    N = X.shape[0] 
+    w = np.reshape(w, (w.size, 1))
+    
+    #calculation for error
+    yminusXw = np.subtract(y, np.dot(X, w))
+    firstterm = np.dot(np.transpose(yminusXw), yminusXw)
+    firstterm = np.divide(firstterm, (2*N))
+    
+    secondterm = np.dot(np.transpose(w), w)
+    secondterm = np.multiply(secondterm, lambd/2)
+    
+    error = firstterm + secondterm
+    error = error.flatten()
+
+    #calculation for error_grad
+    xtransposeX = np.dot(np.transpose(X), X)
+    wtransposeX = np.dot(np.transpose(w), xtransposeX)
+    
+    ytransposeX = np.dot(np.transpose(y), X)
+    
+    first_term = np.subtract(wtransposeX, ytransposeX)
+    first_term = np.divide(first_term, N)
+    
+    second_term = np.multiply(np.transpose(w), lambd)
+    
+    error_grad = first_term + second_term
+    error_grad = np.reshape(error_grad, ((error_grad.size),1))
+    error_grad = error_grad.flatten()
+                                           
     return error, error_grad
 
 def mapNonLinear(x,p):
@@ -190,7 +223,7 @@ def mapNonLinear(x,p):
     return Xd
 
 # Main script
-folderpath = '/home/hharwani/Downloads/ML-Project-2/'
+folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -258,21 +291,23 @@ def generatePoints(Xtest,means,covmat,qdaFlag):
 means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
+plt.figure()
 generateMesh(means,covmat,False)
 generatePoints(Xtest,means,covmat,False)
-plt.title("LDA")
+plt.title("LDA Accuracy = " +str(ldaacc))
 plt.show()
 # QDA
 
 meansQda,covmatsQda = qdaLearn(X,y)
 qdaacc = qdaTest(meansQda,covmatsQda,Xtest,ytest)
+plt.figure()
 generateMesh(meansQda,covmatsQda,True)
 generatePoints(Xtest,meansQda,covmatsQda,True)
-plt.title("QDA")
 print('QDA Accuracy = '+str(qdaacc))
+plt.title("QDA Accuracy =" +str(qdaacc))
 plt.show()
-# Problem 2
 
+# Problem 2
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'diabetes.pickle','rb'))   
 # add intercept
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
@@ -296,9 +331,11 @@ for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
-#plt.subplot(211)
-#plt.plot(lambdas,rmses3)
 
+plt.figure()
+plt.title("Problem 3")
+plt.plot(lambdas,rmses3)
+plt.show()
 
 # Problem 4
 k = 21
@@ -306,7 +343,7 @@ lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
 opts = {'maxiter' : 100}    # Preferred value.                                                
-'''
+
 w_init = np.zeros((X_i.shape[1],1))
 for lambd in lambdas:
     args = (X_i, y, lambd)
@@ -316,8 +353,10 @@ for lambd in lambdas:
         w_l_1[j] = w_l.x[j]
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
     i = i + 1
+plt.figure()
+plt.title("Problem 4")
 plt.plot(lambdas,rmses4)
-'''
+plt.show()
 
 # Problem 5
 pmax = 7
@@ -330,10 +369,8 @@ for p in range(pmax):
     rmses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
     w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
     rmses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
-plt.subplot(212)
+plt.figure()
 plt.plot(range(pmax),rmses5)
 plt.legend(('No regularization','With regularization'))
-
 plt.axis('equal')
 plt.show()
-#plt.show()

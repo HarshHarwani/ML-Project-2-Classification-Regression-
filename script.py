@@ -224,7 +224,7 @@ def mapNonLinear(x,p):
 
 # Main script
 #folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
-folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
+folderpath = '/home/hharwani/Downloads/ML-Project-2/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -316,12 +316,18 @@ Xtest_i = np.concatenate((np.ones((Xtest.shape[0],1)), Xtest), axis=1)
 
 w = learnOLERegression(X,y)
 mle = testOLERegression(w,Xtest,ytest)
+#Added by Harsh for calculating RMSE on training data without Intercept
+mle_train = testOLERegression(w,X,y)
 
 w_i = learnOLERegression(X_i,y)
 mle_i = testOLERegression(w_i,Xtest_i,ytest)
+#Added by Harsh for calculating RMSE on training data with Intercept
+mle_i_train = testOLERegression(w_i,X_i,y)
 
 print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
+print('RMSE without intercept on training data'+str(mle_train))
+print('RMSE with intercept on training data'+str(mle_i_train))
 
 # Problem 3
 k = 101

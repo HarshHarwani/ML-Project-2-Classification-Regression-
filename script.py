@@ -6,6 +6,8 @@ from numpy.linalg import inv
 import scipy.io
 import matplotlib.pyplot as plt
 import pickle
+import time
+
 def ldaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -290,6 +292,7 @@ def generatePoints(Xtest,means,covmat,qdaFlag):
 
 # LDA
 print '-------------LDA---------------'
+start_time = time.time()
 means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
@@ -298,9 +301,11 @@ generateMesh(means,covmat,False)
 generatePoints(Xtest,means,covmat,False)
 plt.title("LDA Accuracy = " +str(ldaacc))
 plt.show()
+print "time", (time.time() - start_time)
 
 # QDA
 print '-------------QDA---------------'
+start_time = time.time()
 meansQda,covmatsQda = qdaLearn(X,y)
 qdaacc = qdaTest(meansQda,covmatsQda,Xtest,ytest)
 plt.figure()
@@ -309,9 +314,11 @@ generatePoints(Xtest,meansQda,covmatsQda,True)
 print('QDA Accuracy = '+str(qdaacc))
 plt.title("QDA Accuracy =" +str(qdaacc))
 plt.show()
+print "time", (time.time() - start_time)
 
 # Problem 2
 print '-------------Problem 2---------------'
+start_time = time.time()
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'diabetes.pickle','rb'))   
 # add intercept
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
@@ -331,9 +338,12 @@ print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
 print('RMSE without intercept on training data'+str(mle_train))
 print('RMSE with intercept on training data'+str(mle_i_train))
+print "time", (time.time() - start_time)
+
 
 # Problem 3
 print '-------------Problem 3---------------'
+start_time = time.time()
 k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
@@ -354,6 +364,7 @@ for lambd in lambdas:
         min_weights = w_l
     
     i = i + 1
+print "time", (time.time() - start_time)
 print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse3
 print 'Sum (OLE): ', np.sum(w_i), ', Sum (Ridge)', np.sum(min_weights)
 print 'Variance (OLE): ', np.var(w_i), ', Variance (Ridge)', np.var(min_weights)
@@ -377,6 +388,7 @@ plt.show()
 
 # Problem 4
 print '-------------Problem 4---------------'
+start_time = time.time()
 k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
@@ -401,6 +413,8 @@ for lambd in lambdas:
         min_weights = w_l_1
     
     i = i + 1
+    
+print "time", (time.time() - start_time)
 print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse4
 print 'Sum (OLE): ', np.sum(w_i), ', Sum (Ridge)', np.sum(min_weights)
 print 'Variance (OLE): ', np.var(w_i), ', Variance (Ridge)', np.var(min_weights)
@@ -416,6 +430,7 @@ plt.show()
 
 # Problem 5
 print '-------------Problem 5---------------'
+start_time = time.time()
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
 rmses5 = np.zeros((pmax,2))
@@ -460,6 +475,7 @@ for p in range(pmax):
 
 print 'Optimum p (no regu): ', min_p
 print 'Optimum p (with regu): ', min_p_regu
+print "time", (time.time() - start_time)
 
 plt.figure()
 y_opt1 = np.dot(Xd_opt1, w_opt1)

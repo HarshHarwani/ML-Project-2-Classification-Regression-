@@ -223,7 +223,8 @@ def mapNonLinear(x,p):
     return Xd
 
 # Main script
-folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
+#folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
+folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -291,21 +292,21 @@ def generatePoints(Xtest,means,covmat,qdaFlag):
 means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
-plt.figure()
-generateMesh(means,covmat,False)
-generatePoints(Xtest,means,covmat,False)
-plt.title("LDA Accuracy = " +str(ldaacc))
-plt.show()
+#plt.figure()
+#generateMesh(means,covmat,False)
+#generatePoints(Xtest,means,covmat,False)
+#plt.title("LDA Accuracy = " +str(ldaacc))
+#plt.show()
 # QDA
 
 meansQda,covmatsQda = qdaLearn(X,y)
 qdaacc = qdaTest(meansQda,covmatsQda,Xtest,ytest)
-plt.figure()
-generateMesh(meansQda,covmatsQda,True)
-generatePoints(Xtest,meansQda,covmatsQda,True)
-print('QDA Accuracy = '+str(qdaacc))
-plt.title("QDA Accuracy =" +str(qdaacc))
-plt.show()
+#plt.figure()
+#generateMesh(meansQda,covmatsQda,True)
+#generatePoints(Xtest,meansQda,covmatsQda,True)
+#print('QDA Accuracy = '+str(qdaacc))
+#plt.title("QDA Accuracy =" +str(qdaacc))
+#plt.show()
 
 # Problem 2
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'diabetes.pickle','rb'))   
@@ -319,6 +320,7 @@ mle = testOLERegression(w,Xtest,ytest)
 w_i = learnOLERegression(X_i,y)
 mle_i = testOLERegression(w_i,Xtest_i,ytest)
 
+print np.around(w_i, decimals=5)
 print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
 
@@ -327,14 +329,38 @@ k = 21
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses3 = np.zeros((k,1))
+rmses3_train = np.zeros((k,1))
+min_rmse = 9999.0
+min_lambda = 0
+min_weights = np.empty([X.shape[1], 1])
+
 for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
+    rmses3_train[i] = testOLERegression(w_l,X_i,y)
+    
+    if rmses3[i] < min_rmse:
+        min_rmse = rmses3[i]
+        min_lambda = lambd
+        min_weights = w_l
+    
     i = i + 1
 
 plt.figure()
-plt.title("Problem 3")
+plt.title("Weight vector comparison")
+plt.plot(range(0, w_i.shape[0]),w_i)
+plt.plot(range(0, min_weights.shape[0]),min_weights)
+plt.xlabel('Weight value')
+plt.legend(('OLE','Ridge regression'))
+plt.show()
+
+plt.figure()
+plt.title("Problem 3: Ridge regression")
 plt.plot(lambdas,rmses3)
+plt.plot(lambdas,rmses3_train)
+plt.xlabel('Lambda value')
+plt.ylabel('RMSE')
+plt.legend(('On test data','On training data'))
 plt.show()
 
 # Problem 4
@@ -353,24 +379,30 @@ for lambd in lambdas:
         w_l_1[j] = w_l.x[j]
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
     i = i + 1
-plt.figure()
-plt.title("Problem 4")
-plt.plot(lambdas,rmses4)
-plt.show()
+#plt.figure()
+#plt.title("Problem 4")
+#plt.plot(lambdas,rmses4)
+#plt.show()
 
 # Problem 5
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
 rmses5 = np.zeros((pmax,2))
+rmses5_training = np.zeros((pmax,2))
 for p in range(pmax):
     Xd = mapNonLinear(X[:,2],p)
     Xdtest = mapNonLinear(Xtest[:,2],p)
     w_d1 = learnRidgeRegression(Xd,y,0)
     rmses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
+    rmses5_training[p,0] = testOLERegression(w_d1,Xd,y)
     w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
     rmses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
+    rmses5_training[p,1] = testOLERegression(w_d2,Xd,y)
 plt.figure()
 plt.plot(range(pmax),rmses5)
-plt.legend(('No regularization','With regularization'))
+plt.plot(range(pmax),rmses5_training)
+plt.xlabel('Value of p')
+plt.ylabel('RMSE')
+plt.legend(('On test data (No reg)','On test data (With reg)','On train data (No reg)','On train data (With reg)'))
 plt.axis('equal')
 plt.show()

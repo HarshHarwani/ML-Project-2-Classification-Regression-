@@ -213,7 +213,7 @@ def mapNonLinear(x,p):
     # x - a single column vector (N x 1)                                       
     # p - integer (>= 0)                                                       
     # Outputs:
-    # Xd - (N x (d+1))  
+    # Xd - (N x (p+1))  
     
     N = x.shape[0]
     Xd = np.empty([N, p+1])
@@ -320,12 +320,11 @@ mle = testOLERegression(w,Xtest,ytest)
 w_i = learnOLERegression(X_i,y)
 mle_i = testOLERegression(w_i,Xtest_i,ytest)
 
-print np.around(w_i, decimals=5)
 print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
 
 # Problem 3
-k = 21
+k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses3 = np.zeros((k,1))
@@ -345,6 +344,9 @@ for lambd in lambdas:
         min_weights = w_l
     
     i = i + 1
+print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse
+print 'Sum (OLE): ', np.sum(w_i), ', Sum (Ridge)', np.sum(min_weights)
+print 'Variance (OLE): ', np.var(w_i), ', Variance (Ridge)', np.var(min_weights)
 
 plt.figure()
 plt.title("Weight vector comparison")
@@ -364,7 +366,7 @@ plt.legend(('On test data','On training data'))
 plt.show()
 
 # Problem 4
-k = 21
+k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
@@ -379,16 +381,29 @@ for lambd in lambdas:
         w_l_1[j] = w_l.x[j]
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
     i = i + 1
-#plt.figure()
-#plt.title("Problem 4")
-#plt.plot(lambdas,rmses4)
-#plt.show()
+plt.figure()
+plt.title("Problem 4")
+plt.plot(lambdas,rmses4)
+plt.show()
 
 # Problem 5
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
 rmses5 = np.zeros((pmax,2))
 rmses5_training = np.zeros((pmax,2))
+min_p = 0
+min_rmse5 = 999999.9
+min_p_regu = 0
+min_rmse5_regu = 999999.9
+
+p_opt1 = 1
+p_opt2 = 2
+N = X.shape[0]
+Xd_opt1 = np.empty([N, p_opt1 + 1])
+Xd_opt2 = np.empty([N, p_opt2 + 1])
+w_opt1 = np.empty([N, 1])
+w_opt2 = np.empty([N, 1])
+
 for p in range(pmax):
     Xd = mapNonLinear(X[:,2],p)
     Xdtest = mapNonLinear(Xtest[:,2],p)
@@ -398,7 +413,36 @@ for p in range(pmax):
     w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
     rmses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
     rmses5_training[p,1] = testOLERegression(w_d2,Xd,y)
+    
+    if p == p_opt1:
+        Xd_opt1 = Xdtest
+        w_opt1 = w_d1
+    if p == p_opt2:
+        Xd_opt2 = Xdtest
+        w_opt2 = w_d2
+    
+    if rmses5[p,0] < min_rmse5:
+        min_rmse5 = rmses5[p,0]
+        min_p = p
+      
+    if rmses5[p,1] < min_rmse5_regu:
+        min_rmse5_regu = rmses5[p,1]
+        min_p_regu = p  
+
+print 'Optimum p (no regu): ', min_p
+print 'Optimum p (with regu): ', min_p_regu
+
 plt.figure()
+y_opt1 = np.dot(Xd_opt1, w_opt1)
+for i in range (Xtest.shape[0]):
+    plt.scatter(Xtest[i][2], y_opt1[i][0], c='r')
+y_opt2 = np.dot(Xd_opt2, w_opt2)
+for i in range (Xtest.shape[0]):
+    plt.scatter(Xtest[i][2], y_opt2[i][0], c='b')
+plt.show()
+
+plt.figure()
+plt.title('Problem 5: Non-linear regression')
 plt.plot(range(pmax),rmses5)
 plt.plot(range(pmax),rmses5_training)
 plt.xlabel('Value of p')

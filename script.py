@@ -432,13 +432,19 @@ for p in range(pmax):
 print 'Optimum p (no regu): ', min_p
 print 'Optimum p (with regu): ', min_p_regu
 
-plt.figure()
+
 y_opt1 = np.dot(Xd_opt1, w_opt1)
 for i in range (Xtest.shape[0]):
-    plt.scatter(Xtest[i][2], y_opt1[i][0], c='r')
+    #plt.scatter(Xtest[i][2], y_opt1[i][0], c='r')
+    plt.scatter(Xtest[i][2], ytest[i][0], c='b', marker='1')
 y_opt2 = np.dot(Xd_opt2, w_opt2)
-for i in range (Xtest.shape[0]):
-    plt.scatter(Xtest[i][2], y_opt2[i][0], c='b')
+#for i in range (Xtest.shape[0]):
+#    plt.scatter(Xtest[i][2], y_opt2[i][0], c='b')
+plt.figure()
+plt.title('Curve plots for non-linear regression')
+plt.plot(Xtest[:,2], y_opt1[:,0], c='r')
+plt.plot(Xtest[:,2], y_opt2[:,0], c='c')
+plt.legend(('No regularisation', 'With regularization'))
 plt.show()
 
 plt.figure()
@@ -450,3 +456,4 @@ plt.ylabel('RMSE')
 plt.legend(('On test data (No reg)','On test data (With reg)','On train data (No reg)','On train data (With reg)'))
 plt.axis('equal')
 plt.show()
+#########

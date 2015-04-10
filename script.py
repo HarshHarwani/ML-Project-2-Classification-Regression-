@@ -6,6 +6,8 @@ from numpy.linalg import inv
 import scipy.io
 import matplotlib.pyplot as plt
 import pickle
+import time
+
 def ldaLearn(X,y):
     # Inputs
     # X - a N x d matrix with each row corresponding to a training example
@@ -223,8 +225,8 @@ def mapNonLinear(x,p):
     return Xd
 
 # Main script
-#folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
-folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
+folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
+#folderpath = '/home/hharwani/Downloads/ML-Project-2/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -289,26 +291,34 @@ def generatePoints(Xtest,means,covmat,qdaFlag):
     plotGraphPoints(Xtest,trueLabel)
 
 # LDA
+print '-------------LDA---------------'
+start_time = time.time()
 means,covmat = ldaLearn(X,y)
 ldaacc = ldaTest(means,covmat,Xtest,ytest)
 print('LDA Accuracy = '+str(ldaacc))
-#plt.figure()
-#generateMesh(means,covmat,False)
-#generatePoints(Xtest,means,covmat,False)
-#plt.title("LDA Accuracy = " +str(ldaacc))
-#plt.show()
-# QDA
+plt.figure()
+generateMesh(means,covmat,False)
+generatePoints(Xtest,means,covmat,False)
+plt.title("LDA Accuracy = " +str(ldaacc))
+plt.show()
+print "time", (time.time() - start_time)
 
+# QDA
+print '-------------QDA---------------'
+start_time = time.time()
 meansQda,covmatsQda = qdaLearn(X,y)
 qdaacc = qdaTest(meansQda,covmatsQda,Xtest,ytest)
-#plt.figure()
-#generateMesh(meansQda,covmatsQda,True)
-#generatePoints(Xtest,meansQda,covmatsQda,True)
-#print('QDA Accuracy = '+str(qdaacc))
-#plt.title("QDA Accuracy =" +str(qdaacc))
-#plt.show()
+plt.figure()
+generateMesh(meansQda,covmatsQda,True)
+generatePoints(Xtest,meansQda,covmatsQda,True)
+print('QDA Accuracy = '+str(qdaacc))
+plt.title("QDA Accuracy =" +str(qdaacc))
+plt.show()
+print "time", (time.time() - start_time)
 
 # Problem 2
+print '-------------Problem 2---------------'
+start_time = time.time()
 X,y,Xtest,ytest = pickle.load(open(folderpath + 'diabetes.pickle','rb'))   
 # add intercept
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
@@ -316,20 +326,30 @@ Xtest_i = np.concatenate((np.ones((Xtest.shape[0],1)), Xtest), axis=1)
 
 w = learnOLERegression(X,y)
 mle = testOLERegression(w,Xtest,ytest)
+#Added by Harsh for calculating RMSE on training data without Intercept
+mle_train = testOLERegression(w,X,y)
 
 w_i = learnOLERegression(X_i,y)
 mle_i = testOLERegression(w_i,Xtest_i,ytest)
+#Added by Harsh for calculating RMSE on training data with Intercept
+mle_i_train = testOLERegression(w_i,X_i,y)
 
 print('RMSE without intercept '+str(mle))
 print('RMSE with intercept '+str(mle_i))
+print('RMSE without intercept on training data'+str(mle_train))
+print('RMSE with intercept on training data'+str(mle_i_train))
+print "time", (time.time() - start_time)
+
 
 # Problem 3
+print '-------------Problem 3---------------'
+start_time = time.time()
 k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses3 = np.zeros((k,1))
 rmses3_train = np.zeros((k,1))
-min_rmse = 9999.0
+min_rmse3 = 9999.0
 min_lambda = 0
 min_weights = np.empty([X.shape[1], 1])
 
@@ -338,13 +358,14 @@ for lambd in lambdas:
     rmses3[i] = testOLERegression(w_l,Xtest_i,ytest)
     rmses3_train[i] = testOLERegression(w_l,X_i,y)
     
-    if rmses3[i] < min_rmse:
-        min_rmse = rmses3[i]
+    if rmses3[i] < min_rmse3:
+        min_rmse3 = rmses3[i]
         min_lambda = lambd
         min_weights = w_l
     
     i = i + 1
-print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse
+print "time", (time.time() - start_time)
+print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse3
 print 'Sum (OLE): ', np.sum(w_i), ', Sum (Ridge)', np.sum(min_weights)
 print 'Variance (OLE): ', np.var(w_i), ', Variance (Ridge)', np.var(min_weights)
 
@@ -366,10 +387,14 @@ plt.legend(('On test data','On training data'))
 plt.show()
 
 # Problem 4
+print '-------------Problem 4---------------'
+start_time = time.time()
 k = 101
 lambdas = np.linspace(0, 0.004, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
+rmses4_train = np.zeros((k,1))
+min_rmse4 = 9999.0
 opts = {'maxiter' : 100}    # Preferred value.                                                
 
 w_init = np.zeros((X_i.shape[1],1))
@@ -380,13 +405,32 @@ for lambd in lambdas:
     for j in range(len(w_l.x)):
         w_l_1[j] = w_l.x[j]
     rmses4[i] = testOLERegression(w_l_1,Xtest_i,ytest)
+    rmses4_train[i] = testOLERegression(w_l_1,X_i,y)
+    
+    if rmses4[i] < min_rmse4:
+        min_rmse4 = rmses4[i]
+        min_lambda = lambd
+        min_weights = w_l_1
+    
     i = i + 1
+    
+print "time", (time.time() - start_time)
+print 'Optimum lambda: ', min_lambda, ' at RMSE = ', min_rmse4
+print 'Sum (OLE): ', np.sum(w_i), ', Sum (Ridge)', np.sum(min_weights)
+print 'Variance (OLE): ', np.var(w_i), ', Variance (Ridge)', np.var(min_weights)
+
 plt.figure()
-plt.title("Problem 4")
+plt.title("Problem 4: Gradient Descent for Ridge Regression Learning")
 plt.plot(lambdas,rmses4)
+plt.plot(lambdas,rmses4_train)
+plt.xlabel('Lambda value')
+plt.ylabel('RMSE')
+plt.legend(('On test data','On training data'))
 plt.show()
 
 # Problem 5
+print '-------------Problem 5---------------'
+start_time = time.time()
 pmax = 7
 lambda_opt = lambdas[np.argmin(rmses4)]
 rmses5 = np.zeros((pmax,2))
@@ -431,6 +475,7 @@ for p in range(pmax):
 
 print 'Optimum p (no regu): ', min_p
 print 'Optimum p (with regu): ', min_p_regu
+print "time", (time.time() - start_time)
 
 
 y_opt1 = np.dot(Xd_opt1, w_opt1)

@@ -225,8 +225,9 @@ def mapNonLinear(x,p):
     return Xd
 
 # Main script
-folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
+#folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
 #folderpath = '/home/hharwani/Downloads/ML-Project-2/'
+folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
 
 # Problem 1
 # load the sample data                                                                 
@@ -477,7 +478,7 @@ print 'Optimum p (no regu): ', min_p
 print 'Optimum p (with regu): ', min_p_regu
 print "time", (time.time() - start_time)
 
-
+plt.figure()
 y_opt1 = np.dot(Xd_opt1, w_opt1)
 for i in range (Xtest.shape[0]):
     #plt.scatter(Xtest[i][2], y_opt1[i][0], c='r')
@@ -485,11 +486,10 @@ for i in range (Xtest.shape[0]):
 y_opt2 = np.dot(Xd_opt2, w_opt2)
 #for i in range (Xtest.shape[0]):
 #    plt.scatter(Xtest[i][2], y_opt2[i][0], c='b')
-plt.figure()
 plt.title('Curve plots for non-linear regression')
 plt.plot(Xtest[:,2], y_opt1[:,0], c='r')
 plt.plot(Xtest[:,2], y_opt2[:,0], c='c')
-plt.legend(('No regularisation', 'With regularization'))
+plt.legend(('No regularization', 'With regularization'))
 plt.show()
 
 plt.figure()

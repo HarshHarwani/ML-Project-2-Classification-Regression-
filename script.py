@@ -226,8 +226,8 @@ def mapNonLinear(x,p):
 
 # Main script
 #folderpath = '/home/harishankar/Workspace/Python/Regression-and-Classification-experiments/'
-#folderpath = '/home/hharwani/Downloads/ML-Project-2/'
-folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
+folderpath = '/home/hharwani/Downloads/ML-Project-2/'
+#folderpath = '/home/ankitkap/machinelearning/pa2/gitbranch/'
 
 # Problem 1
 # load the sample data                                                                 
